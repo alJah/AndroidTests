@@ -11,42 +11,7 @@ namespace AndroidTests
     [DesignTimeVisible(false)]
     public partial class MainPage : ContentPage
     {
-        #region пасхалка
-        DateTime? LastTap = null;
-        byte taps = 0;
-        byte numTapsToAlert = 7;
-   
-        /// <summary>
-        /// Покажет пасхалку
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private async void ShowMessage(object sender, EventArgs e)
-        {
-            if (LastTap == null || (DateTime.Now - LastTap.Value).TotalMilliseconds < waitTap)
-            {
-                if (taps == (numTapsToAlert - 1))
-                {
 
-                    await App.Current.MainPage.DisplayAlert("Учите металл!", "Круг - это то же самое, что и квадрат, только круг - круглый, а квадрат - квадратный.", "Ясно");
-
-                    taps = 0;
-                    LastTap = null;
-                    return;
-                }
-                else
-                {
-                    taps++;
-                    LastTap = DateTime.Now;
-                }
-            }
-            else
-            {
-                taps = 1;
-                LastTap = DateTime.Now;
-            }
-        }
-        #endregion
 
         Color selected = Color.FromRgb(237,234,146);
         Color unselected = Color.FromRgb(253,253,253);
