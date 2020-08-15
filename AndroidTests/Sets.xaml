@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Class="AndroidTests.Sets" Title="Настройки">
+    <ContentPage.Content>
+        <StackLayout Orientation="Vertical">
+            <Frame BackgroundColor="WhiteSmoke" Margin="4" BorderColor="Green">
+            <StackLayout Orientation="Horizontal" Margin="8" >
+                <Label Text="Вопросы по порядку" VerticalOptions="Center" FontSize="Body" HorizontalOptions="Start"/>
+                <Switch x:Name="swSeries" IsToggled="{Binding Sw_ser, Mode=TwoWay}" VerticalOptions="Center" HorizontalOptions="EndAndExpand"/>
+            </StackLayout>
+            </Frame>
+            <Frame BackgroundColor="WhiteSmoke" Margin="4" BorderColor="Green">
+            <StackLayout Orientation="Horizontal" Margin="8">
+                <Label Text="Показывать ошибки чаще" VerticalOptions="Center" FontSize="Body" HorizontalOptions="Start"/>
+                <Switch x:Name="swErr" IsToggled="{Binding Sw_err, Mode=TwoWay}" VerticalOptions="Center" HorizontalOptions="EndAndExpand"/>
+                </StackLayout>
+            </Frame>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
