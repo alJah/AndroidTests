@@ -121,7 +121,7 @@ namespace AndroidTests
             set
             {
                     _questCase = value;                 
-                    QuestCase.Shuffle(ref _questCase);
+                    QuestCase.Shuffle(_questCase);
                     OnPropertyChanged("Question");
                     OnPropertyChanged("Type");
                     OnPropertyChanged("Errors");
