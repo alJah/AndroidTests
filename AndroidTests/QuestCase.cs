@@ -51,7 +51,7 @@ namespace AndroidTests
         /// <summary>
         /// Перемешать порядок ответов.
         /// </summary>
-        public static void Shuffle(ref QuestCase quest)
+        public static void Shuffle(QuestCase quest)
         {
             System.Security.Cryptography.RNGCryptoServiceProvider provider = new System.Security.Cryptography.RNGCryptoServiceProvider();
             KeyValuePair<string, bool>[] list = new KeyValuePair<string, bool>[quest.Answers.Count];
