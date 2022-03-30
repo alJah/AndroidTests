@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Example_Test>
+<Root>
   <Theme>
     <Name>Название темы 1</Name>
     <ThemeQuests>
@@ -99,4 +99,4 @@
       </Question>
     </ThemeQuests>
   </Theme>
-</Example_Test>
+</Root>

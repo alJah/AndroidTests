@@ -60,7 +60,7 @@ namespace AndroidTests
             XDocument document = XDocument.Parse(xml);
             List<QuestCase> qBase = new List<QuestCase>();
             int x = 0;//номер вопроса
-            foreach (XElement element in document.Element("Example_Test").Elements("Theme"))
+            foreach (XElement element in document.Element("Root").Elements("Theme"))
             {
                 string themeName = element.Element("Name").Value;
                 foreach (XElement qsts in element.Element("ThemeQuests").Elements("Question"))

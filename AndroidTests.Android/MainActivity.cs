@@ -19,7 +19,7 @@ namespace AndroidTests.Droid
         /// <summary>
         /// ЭТОТ ФАЙЛ ЛЕЖИТ В ASSETS!
         /// </summary>
-        readonly string XMLname = "ExampleBase.xml";
+        readonly string XMLname = "EB_3_(2021)743.xml";
         protected override void OnCreate(Bundle savedInstanceState)
         {
             TabLayoutResource = Resource.Layout.Tabbar;
