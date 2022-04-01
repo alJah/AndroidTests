@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using Xamarin.Essentials;
 using System.ComponentModel;
 using System.Linq;
+using Xamarin.Forms;
+using System.Windows.Input;
 
 namespace AndroidTests
 {
-   
+
     public class MyView : INotifyPropertyChanged
     {
+        public event Errored SaveError;
         public event LoadCase GetCase;
+        public event ClearErrorList ClearErrors;
         /// <summary>
         /// Название ключа настройки. Вопросы по порядку.
         /// </summary>
@@ -26,11 +30,6 @@ namespace AndroidTests
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Событие получения ответа
-        /// </summary>
-        public event Answered GotAnswer;
-
-        /// <summary>
         /// Отображаемый вопрос со списком ответов
         /// </summary>
         private QuestCase _questCase;
@@ -38,6 +37,25 @@ namespace AndroidTests
         private byte _taps;
         private bool _swerr;
         private bool _swser;
+        private ICommand tapCommand;
+        private ICommand changeCommand;
+        private ICommand deleteErrorsCommand;
+
+        private bool gettingError = false;
+        public bool GettingError
+        {
+            private get
+            {
+                return gettingError;
+            }
+            set
+            {
+                gettingError = value;
+                if (gettingError) {  Errors = 4; }
+                OnPropertyChanged(nameof(GettingError));
+                OnPropertyChanged(nameof(Errors));
+            }
+        }
 
         /// <summary>
         /// Настройка. Показывать ошибки чаще?
@@ -48,15 +66,15 @@ namespace AndroidTests
             {
                 return _swerr;
             }
-            set 
-            { 
-                _swerr = value;                
+            set
+            {
+                _swerr = value;
                 OnPropertyChanged("Sw_err");
                 _swser = !value;
                 OnPropertyChanged("Sw_ser");
                 SaveSettings();
             }
-        }     
+        }
 
         /// <summary>
         /// Настройка. Вопросы по порядку?
@@ -79,9 +97,10 @@ namespace AndroidTests
         /// <summary>
         /// Счётчик до выхода из списка чаще показываемых
         /// </summary>
-        public byte Errors
+        public sbyte Errors
         {
-            get { return _questCase.Errors; }
+            get { return QuestCase.Errors; }
+            set { QuestCase.Errors = value; }
         }
         /// <summary>
         /// Количество сделанных тапов
@@ -92,67 +111,75 @@ namespace AndroidTests
             set
             {
                 _taps = value;
-                OnPropertyChanged("Taps");
-                if (_taps == _questCase.Valid)
-                {
-                    IsAnswered = true;
-                    GotAnswer();
-                    OnPropertyChanged("IsAnswered");
-                }
-                else IsAnswered = false;
+                OnPropertyChanged(nameof(Taps));
+                OnPropertyChanged(nameof(IsAnswered));
             }
         }
-
-        internal void NextCase()
+        private void ChangeCase()
         {
-            if (Sw_ser) QuestCase = GetCase(Number + 1);
+            if (IsAnswered)
+            {
+                if (!GettingError && QuestCase.Errors > 0) { QuestCase.Errors -= 1; }
+                SaveError();
+            }
+            if (Sw_ser) QuestCase = GetCase(Number);
             else QuestCase = GetCase(-1);
         }
-        internal void NextCase(int v)
+        internal void ChangeCase(int v)
         {
-            GetCase(v);
+            QuestCase = GetCase(v);
         }
         /// <summary>
         /// Кейс с вопросом, ответами
         /// </summary>
-        public QuestCase QuestCase
+        public  QuestCase QuestCase
         {
             get { return _questCase; }
             set
             {
-                    _questCase = value;                 
-                    QuestCase.Shuffle(_questCase);
-                    OnPropertyChanged("Question");
-                    OnPropertyChanged("Type");
-                    OnPropertyChanged("Errors");
-                    for (int x = 0; x < 4; x++)
-                    {
-                        OnPropertyChanged("Answer" + x.ToString());
-                        OnPropertyChanged("Bingo" + x.ToString());
-                    }
-                    OnPropertyChanged("Number");
-                    _taps = 0;
-                    OnPropertyChanged("Taps");
-                    IsAnswered = false;
-                    OnPropertyChanged("IsAnswered");             
+                _questCase = value;
+                QuestCase.Shuffle(QuestCase);
+                GettingError = false;
+                Taps = 0;
+                OnPropertyChanged("");
             }
         }
         public MyView()
         {
+            TapCommand = new Command<MyLabel>(MyLabelTapped);
+            CmdChangeCase = new Command(ChangeCase);
+            deleteErrorsCommand = new Command(Clear);
             Sw_err = Preferences.Get(_errors, true);
             Sw_ser = Preferences.Get(_series, false);
         }
+        private void Clear(object obj)
+        {
+            ClearErrors();
+        }
+        private void MyLabelTapped(MyLabel label)
+        {
+            if (IsAnswered) return;
+            if (label.IsClicked)
+            {
+                label.IsClicked = false;
+                Taps -= 1;
+                return;
+            }
+            label.IsClicked = true;
+            Taps += 1;
+        }
 
         /// <summary>
-        /// Вопрос закрыт?
+        /// Answer recived?
         /// </summary>
-        public bool IsAnswered { get; private set; }
+        public bool IsAnswered { get => Taps == QuestCase.Valid; }
+
         /// <summary>
         /// Номер вопроса
         /// </summary>
         public int Number
         {
-            get { return _questCase.Number; }
+            get { return _questCase.Number + 1; }
         }
         /// <summary>
         /// Текст вопроса
@@ -168,22 +195,9 @@ namespace AndroidTests
         {
             get { return _questCase.Type; }
         }
-
-        #region Тексты ответов
-        public string Answer0 { get { return _questCase.Answers.Keys.ElementAt(0); } }
-        public string Answer1 { get { return _questCase.Answers.Keys.ElementAt(1); } }
-        public string Answer2 { get { return _questCase.Answers.Keys.ElementAt(2); } }
-        public string Answer3 { get { if (_questCase.Answers.Count < 4) return ""; else return _questCase.Answers.Keys.ElementAt(3); } }
-        #endregion
-
-        #region Значения "правильности" ответа.
-        public bool Bingo0 { get { return _questCase.Answers.Values.ElementAt(0); } }
-        public bool Bingo1 { get { return _questCase.Answers.Values.ElementAt(1); } }
-        public bool Bingo2 { get { return _questCase.Answers.Values.ElementAt(2); } }
-        public bool Bingo3 { get { if (_questCase.Answers.Count < 4) return false; else return _questCase.Answers.Values.ElementAt(3); } }
-
-        #endregion
-
+        public ICommand CmdChangeCase { get => changeCommand; set => changeCommand = value; }
+        public ICommand TapCommand { get => tapCommand; set => tapCommand = value; }
+        public ICommand ClearErrorsCommand { get => deleteErrorsCommand; set => deleteErrorsCommand = value; }
         protected void OnPropertyChanged(string propName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));

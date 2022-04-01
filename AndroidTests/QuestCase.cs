@@ -7,10 +7,10 @@ namespace AndroidTests
     [Serializable]
     public class QuestCase
     {
-        private Dictionary<string, bool> _answers;
-        private byte errors;
+        private readonly Dictionary<string, bool> _answers;
+        private sbyte errors;
         public int Number { get;}
-        public byte Errors { get { return errors; } set { errors = value < 0 ? (byte)0 : value; } }
+        public sbyte Errors { get { return errors; } set { errors = value < 0 ? (sbyte)0 : value; } }
         /// <summary>
         /// Тема вопроса
         /// </summary>

@@ -4,6 +4,19 @@ using Xamarin.Forms;
 
 namespace AndroidTests
 {
+    public class ColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (((Color)value) == Color.Red) return true;
+            return false;
+        }
+    }
     /// <summary>
     /// Увеличивет входное значение (индекс массива) на 1
     /// </summary>
@@ -51,7 +64,7 @@ namespace AndroidTests
     {
         object IValueConverter.Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (byte)value > 0 ? Color.Red : Color.Green;
+            return (sbyte)value > 0 ? Color.Red : Color.Green;
         }
         object IValueConverter.ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {

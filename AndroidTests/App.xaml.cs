@@ -4,6 +4,7 @@ using Xamarin.Forms;
 using System.Linq;
 using System.Xml.Linq;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace AndroidTests
 {
@@ -13,29 +14,35 @@ namespace AndroidTests
     /// <param name="number">Номер запрашиваемого вопроса или -1, если нужен случайный вопрос.</param>
     /// <returns></returns>
     public delegate QuestCase LoadCase(int number);
-    public delegate void Answered();
+    public delegate void Errored();
+    public delegate void ClearErrorList();
+    
     public partial class App : Application
     {
+        private readonly IEnumerable<QuestCase> Errors;
         readonly string basename;
-        List<QuestCase> SessionBase;
-        readonly IEnumerable<QuestCase> Errors;
+        public static List<QuestCase> SessionBase;
+        
 
         public App(string bName, string xmlString)
         {
             InitializeComponent();
             basename = bName;
-            LoadBase(xmlString);
-
+            SessionBase = LoadBase(xmlString);
             Errors = from e in SessionBase where e.Errors > 0 select e;
             MyView myView = new MyView() { QuestCase = SessionBase[Utils.RandomInt(0,SessionBase.Count-1)] };
-            myView.GetCase += MyView_Need;
+            myView.GetCase += GetCase;
+            myView.SaveError += SaveBase;
+            myView.ClearErrors += ClearErrors;
+          
             MainPage = new NavigationPage(new MainPage(myView));
         }
 
-        private void LoadBase(string xml)
+        private List<QuestCase> LoadBase(string xml)
         {
             IFileWorker worker = DependencyService.Get<IFileWorker>();
-            List<QuestCase> myBase = new List<QuestCase>();
+            // List<QuestCase> myBase = new List<QuestCase>();
+            List<QuestCase> myBase;
             if (!worker.ExistAsync(basename).Result)
             {
                 myBase = Parse(xml);
@@ -52,7 +59,7 @@ namespace AndroidTests
                     myBase = Parse(xml);
                 }
             }
-            SessionBase = myBase;
+           return myBase;
         }
 
         private List<QuestCase> Parse(string xml)
@@ -94,11 +101,11 @@ namespace AndroidTests
         /// </summary>
         /// <param name="v">Запрашиваемый номер вопроса</param>
         /// <returns></returns>
-        private QuestCase MyView_Need(int v)
+        private QuestCase GetCase(int v)
         {
-            if (v < 0)
+            if (v < 0 || v > SessionBase.Count)
                 return RandomCase();
-            else
+            else 
                 return v == SessionBase.Count ? SessionBase[0] : SessionBase[v];
         }
         /// <summary>
@@ -106,38 +113,46 @@ namespace AndroidTests
         /// </summary>
         /// <returns></returns>
         private QuestCase RandomCase()
-        {
-            if (Utils.RandomInt(0, 100) % 4 == 0 && Errors.Any())
+        {        
+            if (Errors.Any() && Utils.RandomInt(0, 100) % 4 == 0)
                 return Errors.ElementAt(Utils.RandomInt(0, Errors.Count() - 1));
             return SessionBase[Utils.RandomInt(0, SessionBase.Count - 1)];
         }
-
+        private void ClearErrors()
+        {
+            foreach(var e in SessionBase)
+            {
+                e.Errors = 0;
+            }
+        }
         protected override void OnStart()
         {
             Open();
         }
         protected override void OnSleep()
         {
-            Save();
+            SaveBase();
         }
         protected override void OnResume()
         {
             Open();
         }
-
         private void Open()
         {
             IFileWorker worker = DependencyService.Get<IFileWorker>();
             if( worker.ExistAsync(basename).Result )
             SessionBase = worker.OpenBase(basename).Result;
         }
-
-        private void Save()
-        {           
-            if (String.IsNullOrEmpty(basename)) return;
-            // перезаписываем файл
-            IFileWorker service = DependencyService.Get<IFileWorker>();
-            service.SaveBase(basename, SessionBase);
+        public async void SaveBase()
+        {          
+             await Task.Run(() => {
+                 if (String.IsNullOrEmpty(basename))
+                     return Task.CompletedTask;
+                 // перезаписываем файл
+                 IFileWorker service = DependencyService.Get<IFileWorker>();
+                 service.SaveBase(basename, SessionBase);
+                 return Task.CompletedTask;
+             });
         }
     }
 }

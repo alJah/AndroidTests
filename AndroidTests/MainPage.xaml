@@ -2,77 +2,77 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local ="clr-namespace:AndroidTests"
-             x:Class="AndroidTests.MainPage" Title="Пример приложения для тестирования">
+             x:Class="AndroidTests.MainPage"
+             x:Name="RootPage"
+             Title="ЭБ. Группа III. До и Выше 1000В">
+
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Настройки" Order="Secondary" Priority="0" Clicked="ToolbarItem_Clicked"/>
     </ContentPage.ToolbarItems>
     <ContentPage.Resources>
         <ResourceDictionary>
-            <local:StringToBool x:Key="StringToBool_"/>
-            <local:PlusOdin x:Key="PlusOdin_"/>
+            <local:ColorConverter x:Key="ColorConvert"/>
             <local:IsGreaterZero x:Key="IsGreaterZero_"/>
-            <Style x:Key="BasicLabel" TargetType="Label" ApplyToDerivedTypes="True">
-                <Setter Property="FontSize" Value="Subtitle"/>
-                <Setter Property="Padding" Value="3"/>
-                <Setter Property="LineBreakMode" Value="WordWrap"/>
-            </Style>
-            <Style x:Key="frameStyle" TargetType="Frame">
-                <Setter Property="Margin" Value="8,3,8,3"/>
-                <Setter Property="Padding" Value="4"/>
-            </Style>
+
+
+            <!--MyLabel Template-->
+            <DataTemplate x:Key="LabelControl">
+                <Frame HasShadow="True" VerticalOptions="Center" CornerRadius="5" BorderColor="AntiqueWhite">
+                    <local:MyLabel x:Name="tempelateLabel" 
+                                   ShowColor="{Binding IsAnswered, Mode=OneWay, Source={RelativeSource AncestorType={Type local:MyView}}}"
+                                   BackgroundColor="{Binding GettingError, Converter={StaticResource ColorConvert}, Source={RelativeSource AncestorType={Type local:MyView}}, Mode=OneWayToSource}"
+                                   FontSize="Subtitle"
+                                   LineBreakMode="WordWrap"
+                                   Text="{Binding Key}" 
+                                   IsAnswer="{Binding Value}">
+                        <local:MyLabel.GestureRecognizers>
+                            <TapGestureRecognizer 
+                                Command="{Binding TapCommand, Source={RelativeSource AncestorType={Type local:MyView}}}"
+                                CommandParameter="{Reference Name=tempelateLabel}" />
+                        </local:MyLabel.GestureRecognizers>
+                    </local:MyLabel>
+                </Frame>
+            </DataTemplate>
+
         </ResourceDictionary>
     </ContentPage.Resources>
+
+
     <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
         <StackLayout Orientation="Horizontal" VerticalOptions="Start">
-            <Label Text="{Binding Type}"
+
+            <!--тема вопроса-->
+            <Label Text="{Binding Path=Type}"
                    FontSize="Small" LineBreakMode="WordWrap" Margin="8,12,0,2" HorizontalOptions="Start" VerticalOptions="Start">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Tapped="ShowMessage"/>
                 </Label.GestureRecognizers>
             </Label>
-            <Label Text="{Binding Number, Converter={StaticResource PlusOdin_}}" FontSize="Micro" 
+
+            <!--номер вопроса-->
+            <Label Text="{Binding Path=Number}" FontSize="Micro" 
                    LineBreakMode="WordWrap" WidthRequest="36" HorizontalOptions="EndAndExpand" Margin="0,8,8,12">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped_1" NumberOfTapsRequired="2"/>
                 </Label.GestureRecognizers>
             </Label>
         </StackLayout>
+
+        <!--Текст вопроса-->
         <Frame BorderColor="{Binding Errors, Converter={StaticResource IsGreaterZero_}}" Margin="8,2,8,4" VerticalOptions="Start">
             <Label Text="{Binding Question}" FontSize="Subtitle" FontAttributes="Bold" LineBreakMode="WordWrap"/>
         </Frame>
-        <ScrollView VerticalOptions="FillAndExpand">
-            <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
-                <Frame Style="{StaticResource frameStyle}">
-                    <local:MyLabel x:Name="lab0" Style="{StaticResource BasicLabel}" Text="{Binding Answer0}" IsAnswer="{Binding Bingo0}">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
-                        </Label.GestureRecognizers>
-                    </local:MyLabel>
-                </Frame>
-                <Frame Style="{StaticResource frameStyle}">
-                    <local:MyLabel x:Name="lab1" Style="{StaticResource BasicLabel}" Text="{Binding Answer1}" IsAnswer="{Binding Bingo1}">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
-                        </Label.GestureRecognizers>
-                    </local:MyLabel>
-                </Frame>
-                <Frame Style="{StaticResource frameStyle}">
-                    <local:MyLabel x:Name="lab2" Style="{StaticResource BasicLabel}" Text="{Binding Answer2}" IsAnswer="{Binding Bingo2}">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
-                        </Label.GestureRecognizers>
-                    </local:MyLabel>
-                </Frame>
-                <Frame x:Name="fr3" Style="{StaticResource frameStyle}" IsVisible="{Binding Answer3,Converter={StaticResource StringToBool_}}">
-                    <local:MyLabel x:Name="lab3" Style="{StaticResource BasicLabel}" IsVisible="{Binding Source={Reference fr3},Path=IsVisible}" Text="{Binding Answer3}" 
-                                   IsAnswer="{Binding Bingo3}">
-                        <Label.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
-                        </Label.GestureRecognizers>
-                    </local:MyLabel>
-                </Frame>
+
+        <!--список ответов-->
+        <ScrollView VerticalOptions="FillAndExpand" Margin="4,6">
+            <StackLayout 
+                Orientation="Vertical" 
+                VerticalOptions="FillAndExpand"
+                BindableLayout.ItemsSource="{Binding QuestCase.Answers}"
+                BindableLayout.ItemTemplate="{StaticResource LabelControl}">
             </StackLayout>
         </ScrollView>
-        <Button Text="Следующий вопрос" Clicked="Button_Clicked" Margin="14,12,14,12" HorizontalOptions="FillAndExpand" VerticalOptions="End" CornerRadius="3"/>
+
+        <Button Text="Следующий вопрос" Command="{Binding CmdChangeCase}"  Margin="14,12,14,12" HorizontalOptions="FillAndExpand" VerticalOptions="End" CornerRadius="3"/>
     </StackLayout>
 </ContentPage>

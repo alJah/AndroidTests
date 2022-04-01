@@ -1,4 +1,5 @@
-﻿using Xamarin.Forms;
+﻿using System;
+using Xamarin.Forms;
 
 namespace AndroidTests
 {
@@ -7,8 +8,8 @@ namespace AndroidTests
         /// <summary>
         /// Был клик?
         /// </summary>
-        public bool IsClicked { get; set ; }
-        public static readonly BindableProperty IsClickedProperty = BindableProperty.Create(propertyName: "IsClicked",
+        public bool IsClicked { get; set; }
+        public static readonly BindableProperty IsClickedProperty = BindableProperty.Create(propertyName: nameof(IsClicked),
                                                          returnType: typeof(bool),
                                                          declaringType: typeof(MyLabel),
                                                          defaultValue: false,
@@ -23,7 +24,7 @@ namespace AndroidTests
         /// Здесь правильный ответ?
         /// </summary>
         public bool IsAnswer { get; set; }
-        public static readonly BindableProperty IsAnswerProperty = BindableProperty.Create(propertyName: "IsAnswer",
+        public static readonly BindableProperty IsAnswerProperty = BindableProperty.Create(propertyName: nameof(IsAnswer),
                                                          returnType: typeof(bool),
                                                          declaringType: typeof(MyLabel),
                                                          defaultValue: false,
@@ -34,11 +35,30 @@ namespace AndroidTests
             var control = (MyLabel)bindable;
             control.IsAnswer = (bool)newValue;
         }
+        public bool ShowColor { get; set; }
+        public static readonly BindableProperty ShowColorProperty = BindableProperty.Create(propertyName: nameof(ShowColor),
+            returnType: typeof(bool),
+            declaringType: typeof(MyLabel),
+            defaultValue: false,
+            defaultBindingMode: BindingMode.OneWay,
+            propertyChanged: ShowColorPropertyChanged);
+
+        private static void ShowColorPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            var lb = (MyLabel)bindable);
+            if ((bool)newValue)
+            {
+                lb.ShowAnsweredColor();
+            }
+            else lb.ShowDefaultColor();
+            lb.IsClicked = false;
+        }
+
         public MyLabel()
         {
 
         }
-        public void ShowColor()
+        private void ShowAnsweredColor()
         {
             if (IsClicked && !IsAnswer)
             {
@@ -46,6 +66,10 @@ namespace AndroidTests
                 return;
             }
             if (IsAnswer) BackgroundColor = Color.Green;
+        }
+        private void ShowDefaultColor()
+        {
+            BackgroundColor = Color.WhiteSmoke;
         }
     }
 }

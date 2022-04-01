@@ -15,7 +15,7 @@ namespace AndroidTests.Droid
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-        readonly string basename = "MyBaseName.mbn";
+        readonly string basename = "MyBaseName.mtg";
         /// <summary>
         /// ЭТОТ ФАЙЛ ЛЕЖИТ В ASSETS!
         /// </summary>
