@@ -110,7 +110,7 @@ namespace AndroidTests
         }
         internal void NextCase(int v)
         {
-            GetCase(v);
+            QuestCase = GetCase(v);
         }
         /// <summary>
         /// Кейс с вопросом, ответами

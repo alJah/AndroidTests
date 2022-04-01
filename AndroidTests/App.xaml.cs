@@ -17,7 +17,7 @@ namespace AndroidTests
     public partial class App : Application
     {
         readonly string basename;
-        List<QuestCase> SessionBase;
+        public List<QuestCase> SessionBase;
         readonly IEnumerable<QuestCase> Errors;
 
         public App(string bName, string xmlString)
