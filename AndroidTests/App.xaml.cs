@@ -19,9 +19,9 @@ namespace AndroidTests
     
     public partial class App : Application
     {
-        private readonly IEnumerable<QuestCase> Errors;
+        private IEnumerable<QuestCase> Errors;
         readonly string basename;
-        public static List<QuestCase> SessionBase;
+        public List<QuestCase> SessionBase;
         
 
         public App(string bName, string xmlString)
@@ -29,7 +29,7 @@ namespace AndroidTests
             InitializeComponent();
             basename = bName;
             SessionBase = LoadBase(xmlString);
-            Errors = from e in SessionBase where e.Errors > 0 select e;
+           
             MyView myView = new MyView() { QuestCase = SessionBase[Utils.RandomInt(0,SessionBase.Count-1)] };
             myView.GetCase += GetCase;
             myView.SaveError += SaveBase;
@@ -113,16 +113,17 @@ namespace AndroidTests
         /// </summary>
         /// <returns></returns>
         private QuestCase RandomCase()
-        {        
+        {
+            Errors = from e in SessionBase where e.Errors > 0 select e;
             if (Errors.Any() && Utils.RandomInt(0, 100) % 4 == 0)
                 return Errors.ElementAt(Utils.RandomInt(0, Errors.Count() - 1));
             return SessionBase[Utils.RandomInt(0, SessionBase.Count - 1)];
         }
         private void ClearErrors()
         {
-            foreach(var e in SessionBase)
+            for(int x = 0; x < SessionBase.Count; x++)
             {
-                e.Errors = 0;
+                SessionBase[x].Errors = 0;
             }
         }
         protected override void OnStart()

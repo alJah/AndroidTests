@@ -35,6 +35,9 @@ namespace AndroidTests
             var control = (MyLabel)bindable;
             control.IsAnswer = (bool)newValue;
         }
+        /// <summary>
+        /// Показываю цвета лейблов
+        /// </summary>
         public bool ShowColor { get; set; }
         public static readonly BindableProperty ShowColorProperty = BindableProperty.Create(propertyName: nameof(ShowColor),
             returnType: typeof(bool),
@@ -45,13 +48,18 @@ namespace AndroidTests
 
         private static void ShowColorPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            var lb = (MyLabel)bindable);
-            if ((bool)newValue)
+            var lb = (MyLabel)bindable;
+            if ((bool)newValue) //it happens while answer getting
             {
+               
                 lb.ShowAnsweredColor();
             }
-            else lb.ShowDefaultColor();
-            lb.IsClicked = false;
+            else//it happens while question is updated
+            {
+                
+                lb.ShowDefaultColor();
+                lb.IsClicked = false;
+            }
         }
 
         public MyLabel()
